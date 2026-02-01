@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Criar Sticker e Enviar no WhatsApp</title>
+    <style>
+      :root {
+        --bg: #0f0f12;
+        --surface: #1a1a20;
+        --border: #2a2a32;
+        --text: #e8e8ec;
+        --muted: #8888a0;
+        --accent: #25d366;
+        --accent-hover: #20bd5a;
+        --error: #f87171;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      main {
+        width: 100%;
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.35rem;
+        font-weight: 600;
+      }
+      p.sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 1.5rem;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+      }
+      input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      input[type="tel"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+      input::file-selector-button {
+        background: var(--border);
+        color: var(--text);
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        margin-right: 0.75rem;
+        cursor: pointer;
+      }
+      button {
+        width: 100%;
+        padding: 0.9rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: var(--accent-hover);
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .message {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        display: none;
+      }
+      .message.show {
+        display: block;
+      }
+      .message.success {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+      }
+      .message.error {
+        background: rgba(248, 113, 113, 0.2);
+        color: var(--error);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Criar Sticker</h1>
+      <p class="sub">Envie uma imagem e receba o sticker no seu WhatsApp.</p>
+
+      <form id="form">
+        <label for="file">Imagem</label>
+        <input type="file" id="file" name="file" accept="image/*" required />
+
+        <label for="phone">Número do WhatsApp</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          placeholder="5511999999999"
+          required
+        />
+
+        <button type="submit" id="btn">Criar e enviar sticker</button>
+      </form>
+
+      <div id="message" class="message" role="alert"></div>
+    </main>
+
+    <script>
+      const form = document.getElementById("form");
+      const btn = document.getElementById("btn");
+      const msgEl = document.getElementById("message");
+
+      function showMessage(text, isError) {
+        msgEl.textContent = text;
+        msgEl.className = "message show " + (isError ? "error" : "success");
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById("file");
+        const phoneInput = document.getElementById("phone");
+        if (!fileInput.files.length) {
+          showMessage("Selecione uma imagem.", true);
+          return;
+        }
+        if (!phoneInput.value.trim()) {
+          showMessage("Informe o número do WhatsApp.", true);
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append("file", fileInput.files[0]);
+        fd.append("phone", phoneInput.value.trim());
+
+        btn.disabled = true;
+        msgEl.classList.remove("show");
+
+        try {
+          const res = await fetch("/api/criar-sticker", {
+            method: "POST",
+            body: fd,
+          });
+          const data = await res.json();
+          if (data.ok) {
+            showMessage(data.message || "Sticker enviado!", false);
+            form.reset();
+          } else {
+            showMessage(data.error || "Erro ao enviar.", true);
+          }
+        } catch (err) {
+          showMessage("Erro de conexão. Tente de novo.", true);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

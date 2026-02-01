@@ -1,0 +1,11 @@
+# Web app
+Flask>=3.0.0
+
+# Imagem → sticker (WebP 512x512)
+Pillow>=10.0.0
+
+# WhatsApp Cloud API (requests para upload + send sticker)
+requests>=2.31.0
+
+# Variáveis de ambiente
+python-dotenv>=1.0.0
