@@ -1,0 +1,22 @@
+[project]
+name = "app-sticker-dev"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "eduardo239", email = "eucrieiumaconta@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.0.0",
+    "pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+app-sticker-dev = "app_sticker_dev:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
